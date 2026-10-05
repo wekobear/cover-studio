@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="封面工坊 —— 浏览器本地使用的小红书封面编辑器，三套模板，导出 PNG / SVG，不上传任何数据" />
+  <title>封面工坊 · 小红书封面编辑器</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314213D'/%3E%3Crect x='6' y='14' width='20' height='4' fill='%23FF5A1F'/%3E%3Crect x='6' y='7' width='12' height='4' fill='%23FAF6F0'/%3E%3Crect x='6' y='21' width='16' height='4' fill='%23FAF6F0'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">封面工坊</span>
+        <span class="brand-version" id="app-version"></span>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" class="btn btn-ghost" id="btn-import">导入项目</button>
+        <button type="button" class="btn btn-ghost" id="btn-export-json">导出项目</button>
+        <button type="button" class="btn btn-ghost" id="btn-reset">重置示例</button>
+        <button type="button" class="btn" id="btn-export-svg">导出 SVG</button>
+        <button type="button" class="btn btn-primary" id="btn-export-png">导出 PNG</button>
+      </div>
+      <input type="file" id="file-import" accept="application/json,.json" hidden />
+    </header>
+
+    <main class="workbench">
+      <aside class="panel panel-left" aria-label="模板与规格">
+        <section class="block">
+          <h2 class="block-title">模板</h2>
+          <div class="tpl-list" id="tpl-list">
+            <button type="button" class="tpl-card is-active" data-template="poster">
+              <span class="tpl-thumb tpl-poster" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="tpl-name">大字报</span>
+              <span class="tpl-desc">大问句 + 城市几何</span>
+            </button>
+            <button type="button" class="tpl-card" data-template="method">
+              <span class="tpl-thumb tpl-method" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="tpl-name">方法卡</span>
+              <span class="tpl-desc">三步条目编辑式</span>
+            </button>
+            <button type="button" class="tpl-card" data-template="editorial">
+              <span class="tpl-thumb tpl-editorial" aria-hidden="true"><i></i><i></i></span>
+              <span class="tpl-name">图文志</span>
+              <span class="tpl-desc">插画 + 标题排版</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2 class="block-title">画幅</h2>
+          <div class="seg" id="seg-ratio">
+            <button type="button" class="seg-item is-active" data-ratio="3:4" title="1080×1440">3:4</button>
+            <button type="button" class="seg-item" data-ratio="1:1" title="1080×1080">1:1</button>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2 class="block-title">配色</h2>
+          <div class="swatches" id="swatches">
+            <button type="button" class="swatch is-active" data-theme="paper" title="纸墨橙">
+              <span class="sw-dot sw-paper" aria-hidden="true"></span>纸墨橙
+            </button>
+            <button type="button" class="swatch" data-theme="ink" title="墨蓝夜">
+              <span class="sw-dot sw-ink" aria-hidden="true"></span>墨蓝夜
+            </button>
+            <button type="button" class="swatch" data-theme="cream" title="暖奶油">
+              <span class="sw-dot sw-cream" aria-hidden="true"></span>暖奶油
+            </button>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2 class="block-title">标题字号</h2>
+          <div class="seg" id="seg-scale">
+            <button type="button" class="seg-item" data-scale="s">小</button>
+            <button type="button" class="seg-item is-active" data-scale="m">标准</button>
+            <button type="button" class="seg-item" data-scale="l">大</button>
+          </div>
+        </section>
+
+        <p class="side-note">所有内容只在本机浏览器处理，不联网上传。</p>
+      </aside>
+
+      <section class="stage" aria-label="封面预览">
+        <div class="warnbar" id="warnbar" hidden></div>
+        <div class="preview-wrap">
+          <div class="preview" id="preview" aria-live="polite"></div>
+        </div>
+        <p class="stage-meta" id="stage-meta"></p>
+      </section>
+
+      <aside class="panel panel-right" aria-label="内容输入">
+        <section class="block">
+          <h2 class="block-title">内容</h2>
+          <div class="field">
+            <label for="f-title">主标题 <span class="counter" data-counter="title"></span></label>
+            <input id="f-title" type="text" maxlength="26" placeholder="例：毕业后，去哪座城？" />
+          </div>
+          <div class="field">
+            <label for="f-subtitle">副标题 <span class="counter" data-counter="subtitle"></span></label>
+            <input id="f-subtitle" type="text" maxlength="60" placeholder="一句话说清真实价值" />
+          </div>
+          <div class="field">
+            <label for="f-signature">署名 <span class="counter" data-counter="signature"></span></label>
+            <input id="f-signature" type="text" maxlength="24" placeholder="例：Weko · 设计与 AI" />
+          </div>
+          <div class="field">
+            <label>标签（最多 3 个，用于封面顶部）</label>
+            <div class="tags-row">
+              <input id="f-tag-0" type="text" maxlength="10" placeholder="标签一" />
+              <input id="f-tag-1" type="text" maxlength="10" placeholder="标签二" />
+              <input id="f-tag-2" type="text" maxlength="10" placeholder="标签三" />
+            </div>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2 class="block-title">方法卡条目 <span class="block-hint">用于「方法卡」模板</span></h2>
+          <div class="item-edit" data-item="0">
+            <div class="item-no">01</div>
+            <div class="field">
+              <label for="f-item-title-0">条目标题 <span class="counter" data-counter="item-title-0"></span></label>
+              <input id="f-item-title-0" type="text" maxlength="12" placeholder="例：就业机会" />
+            </div>
+            <div class="field">
+              <label for="f-item-desc-0">一句话说明 <span class="counter" data-counter="item-desc-0"></span></label>
+              <input id="f-item-desc-0" type="text" maxlength="34" placeholder="例：先看岗位多不多" />
+            </div>
+          </div>
+          <div class="item-edit" data-item="1">
+            <div class="item-no">02</div>
+            <div class="field">
+              <label for="f-item-title-1">条目标题 <span class="counter" data-counter="item-title-1"></span></label>
+              <input id="f-item-title-1" type="text" maxlength="12" />
+            </div>
+            <div class="field">
+              <label for="f-item-desc-1">一句话说明 <span class="counter" data-counter="item-desc-1"></span></label>
+              <input id="f-item-desc-1" type="text" maxlength="34" />
+            </div>
+          </div>
+          <div class="item-edit" data-item="2">
+            <div class="item-no">03</div>
+            <div class="field">
+              <label for="f-item-title-2">条目标题 <span class="counter" data-counter="item-title-2"></span></label>
+              <input id="f-item-title-2" type="text" maxlength="12" />
+            </div>
+            <div class="field">
+              <label for="f-item-desc-2">一句话说明 <span class="counter" data-counter="item-desc-2"></span></label>
+              <input id="f-item-desc-2" type="text" maxlength="34" />
+            </div>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2 class="block-title">图片 <span class="block-hint">用于「图文志」模板</span></h2>
+          <div class="img-actions">
+            <button type="button" class="btn" id="btn-upload">选择图片</button>
+            <button type="button" class="btn btn-ghost" id="btn-remove-img" hidden>移除图片</button>
+            <input type="file" id="file-image" accept="image/png,image/jpeg,image/webp" hidden />
+          </div>
+          <p class="img-status" id="img-status">支持 PNG / JPG / WebP，不超过 5MB。默认使用内置插画。</p>
+        </section>
+
+        <section class="block">
+          <h2 class="block-title">AI 提示词 <span class="block-hint">模板，需自行粘贴到 AI 工具</span></h2>
+          <div class="seg seg-mini" id="seg-prompt">
+            <button type="button" class="seg-item is-active" data-prompt="copy">文案提示词</button>
+            <button type="button" class="seg-item" data-prompt="image">生图提示词</button>
+          </div>
+          <textarea id="prompt-out" readonly rows="8" spellcheck="false"></textarea>
+          <div class="prompt-actions">
+            <button type="button" class="btn" id="btn-copy-prompt">复制提示词</button>
+            <span class="prompt-tip" id="prompt-tip">复制失败时，请手动全选文本复制。</span>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
