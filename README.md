@@ -1,6 +1,6 @@
 # 封面工坊 v0.2.0
 
-浏览器本地使用的小红书封面编辑器：三套模板（大字报 / 方法卡 / 图文志），实时预览，导出真实尺寸的 PNG 与 SVG。所有内容只在本机浏览器处理，不联网上传任何数据。
+浏览器本地使用的小红书封面编辑器：三套模板（大字报 / 方法卡 / 图文志），实时预览，导出真实尺寸的 PNG 与 SVG。编辑的文字和图片只在本机浏览器处理，不上传到服务端。
 
 ## 运行
 
@@ -16,7 +16,7 @@ npm run preview    # 本地预览构建产物
 
 ## 部署（Netlify）
 
-仓库根目录已含 `netlify.toml`：构建命令 `npm run build`，发布目录 `dist`，Node 版本 20，并配置了严格 CSP 等安全响应头。连接仓库后 Netlify 会自动按此构建；本项目交付时**尚未部署上线**。
+仓库根目录已含 `netlify.toml`：构建命令 `npm run build`，发布目录 `dist`，Node 版本 20，并配置了严格 CSP 等安全响应头。已上线：[封面工坊](https://wekobear-cover-studio.netlify.app/)。源码保存在 [GitHub](https://github.com/wekobear/cover-studio)，Netlify 已连接 `main` 分支，推送后自动构建。
 
 ## 输入保存范围
 
@@ -33,6 +33,7 @@ npm run preview    # 本地预览构建产物
 
 ## 已知边界
 
-- 未在真实 Netlify 线上环境验证（本地静态服务器 + 同款 CSP 头模拟验证通过）。
+- 已在真实 Netlify 环境验证模板切换、文字编辑、插画显示、PNG 导出、提示词复制及刷新恢复；线上静态资产与验收构建一致。
+- 本地验证：27 项单元测试及 17 项核心流程通过。
 - E2E 验证使用系统 Chrome headless；Safari / Firefox 未测。
 - 「AI 提示词」仅为本地生成的提示词模板，不包含也不宣称在线 AI 能力。
