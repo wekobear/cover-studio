@@ -12,4 +12,6 @@
     X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-    Content-Security-Policy = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'"
+    # style-src 除 'self' 外仅允许一个内容 hash：react-aria（HeroUI 底层）PressResponder
+    # 在运行时注入的固定 touch-action 规则 <style>（内容确定，无 unsafe-inline）。
+    Content-Security-Policy = "default-src 'none'; script-src 'self'; style-src 'self' 'sha256-38RhXrc7EdReTKsOm23ZPOCUgniTUUcjky8QOOrQx6o='; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'"

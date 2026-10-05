@@ -1,6 +1,6 @@
-// 内置插画（public/assets/city-editorial.png，由独立生图交接）。
-// 运行时取回并转为 data URL，进预览与导出；取不到（或超 5MB）时回退几何占位。
-import { LIMITS } from './themes.js';
+// 内置插画（public/assets/city-editorial.png，v0.2.0 交接沿用）。
+// 运行时取回并转为 data URL，进预览与导出；取不到（或超 5MB）时回退空值。
+import { LIMITS } from './poster/model.js';
 
 let cache = null;
 
@@ -13,7 +13,7 @@ function blobToDataUrl(blob) {
   });
 }
 
-export function getEditorialAsset() {
+export function loadBuiltinImage() {
   if (cache) return cache;
   cache = (async () => {
     try {

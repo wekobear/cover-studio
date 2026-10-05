@@ -1,49 +1,77 @@
-// AI 提示词模板：基于已填写内容生成可复制的提示词。
-// 这是「提示词模板」，由用户自行粘贴到外部 AI 工具，本站不提供在线生成。
-import { RATIOS, THEMES, TEMPLATES } from './themes.js';
+/* 提示词生成：参数必须真实（体系/主题/配方取自当前状态与主题数据），
+ * 可在调用 Guizang Social Card Skill 时复现同一方向。
+ * 不暗示浏览器已调用本地 CLI 或在线 AI —— 这里只产出可复制的参数化提示词。
+ */
 
-const THEME_MOOD = {
-  paper: '暖白纸感背景，深墨蓝主色，鲜橙点缀，编辑杂志式克制排版',
-  ink: '深墨蓝底，反白主色，暖橙点缀，夜色沉稳氛围',
-  cream: '暖奶油底，深棕主色，深橙点缀，温暖轻盈',
-};
+import { getRecipe, getBoard } from './poster/model.js';
+import { EDITORIAL_THEMES, SWISS_ACCENTS } from './poster/theme-data.js';
+
+export const SKILL_SOURCE = 'guizang-social-card-skill @ cf4b810 (github.com/op7418/guizang-social-card-skill)';
+
+function themeInfo(state) {
+  if (state.system === 'swiss') {
+    const t = SWISS_ACCENTS.find((x) => x.id === state.theme) || SWISS_ACCENTS[0];
+    return { kind: 'accent', label: t.label, vars: t.vars };
+  }
+  const t = EDITORIAL_THEMES.find((x) => x.id === state.theme) || EDITORIAL_THEMES[0];
+  return { kind: 'theme', label: t.label, vars: t.vars };
+}
+
+function varLines(vars) {
+  return Object.entries(vars)
+    .filter(([k]) => !k.endsWith('-rgb'))
+    .map(([k, v]) => `    ${k}: ${v}`)
+    .join('\n');
+}
+
+function systemEn(system) {
+  return system === 'swiss' ? 'Swiss International' : 'Editorial Magazine × E-ink';
+}
 
 export function buildCopyPrompt(state) {
+  const recipe = getRecipe(state.recipe);
+  const board = getBoard(state.ratio);
+  const theme = themeInfo(state);
   const c = state.content;
-  const tags = (c.tags || []).filter((t) => t && t.trim());
-  const items = (c.items || [])
-    .filter((it) => it && ((it.title || '').trim() || (it.desc || '').trim()))
-    .map((it, i) => `${i + 1}. ${(it.title || '').trim()}${(it.desc || '').trim() ? '——' + it.desc.trim() : ''}`)
+  const items = c.items
+    .map((it, i) => `${i + 1}. ${it.title}${it.desc ? '——' + it.desc : ''}`)
     .join('\n');
+  return `请按以下参数为一篇社交内容产出封面文案（不编造数据与指标，不写技术实现/使用提示）：
 
-  return [
-    '请为一条小红书笔记打磨封面文案。只基于我给出的真实信息改写，不要编造数据、人数、收益或权威背书，不要「最适合 / 精准大数据」类说法。',
-    '',
-    `【主题】${(c.title || '').trim() || '（待填）'}`,
-    `【现有副标题】${(c.subtitle || '').trim() || '（待填）'}`,
-    `【标签】${tags.length ? tags.join('、') : '（待填）'}`,
-    items ? `【方法卡条目】\n${items}` : '【方法卡条目】（未填写）',
-    `【署名】${(c.signature || '').trim() || '（待填）'}`,
-    '',
-    '要求：',
-    '1. 主标题不超过 14 字，口语化、有信息量，不用夸张符号堆砌。',
-    '2. 副标题不超过 20 字，说清真实价值。',
-    '3. 标签 2-3 个，每个不超过 6 字。',
-    '4. 输出 3 组备选，直接给结果，不用解释。',
-  ].join('\n');
+[渲染体系] ${systemEn(state.system)}
+[来源 Skill] ${SKILL_SOURCE}
+[配方 Recipe] ${recipe.id} ${recipe.label.replace(recipe.id + ' ', '')}
+[画幅] ${board.label} ${board.w}×${board.h}
+[${theme.kind === 'accent' ? '强调色 accent' : '主题 theme'}] ${state.theme}（${theme.label}）
+    ${varLines(theme.vars)}
+
+[现有内容]
+主标题：${c.title.replace(/\n/g, '/')}
+副标题：${c.subtitle}
+刊眉：${c.kicker}
+署名：${c.signature}
+条目：
+${items}
+
+[要求]
+- 保持上述体系/配方/主题不变，只优化文字表达；标题遵循配方长度预算。
+- 输出：主标题（可含换行）、副标题、条目标题与一句话说明。
+- 中文优先，英文术语保留原文；不添加未提供的数字。`;
 }
 
 export function buildImagePrompt(state) {
-  const t = THEMES[state.theme] || THEMES.paper;
-  const ratio = RATIOS[state.ratio] || RATIOS['3:4'];
-  const topic = (state.content.title || '').trim() || '（待填主题）';
-  return [
-    '请生成一张用于社交媒体封面的插画。画面中不出现任何中文、英文、数字、logo、水印、人像或真实地标——文字由我后期在封面编辑器里排版，素材与文字保持分离。',
-    '',
-    `【用途】${(TEMPLATES[state.template] || TEMPLATES.poster).label}风格封面底图，比例 ${ratio.label}`,
-    `【主题氛围】与「${topic}」相关，编辑杂志式、高级克制、留白充足`,
-    `【配色】${THEME_MOOD[state.theme] || THEME_MOOD.paper}（主色 ${t.bg} / ${t.ink} / ${t.accent} 附近）`,
-    '【构图】画面主体位于中下方，上方约三分之一保留干净空间，供后期叠加标题',
-    '【避免】任何文字元素、假 UI 截图、二维码、联系方式、虚构排名或对比表',
-  ].join('\n');
+  const theme = themeInfo(state);
+  const mood =
+    state.system === 'swiss'
+      ? '干净棚拍感、大面纯色留白、无杂物，适合瑞士国际主义排版'
+      : '柔和自然光、纸感颗粒、安静的生活氛围，适合杂志编辑风排版';
+  return `为一张社交封面生成配图（图内不要出现任何文字、水印、Logo、界面边框）：
+
+[风格基调] ${mood}
+[适配主题] ${state.theme}（${theme.label}；纸面色 ${theme.vars['--paper'] || ''}）
+[用途] ${state.system === 'swiss' ? '瑞士式' : '杂志式'}封面配图，主体居中或偏下，上方/一侧留出低细节安静区供标题排字
+[禁止] 高饱和午间强光、正面闪光、游客打卡式构图、含字海报
+[输出] 3:4 或 4:3 高分辨率照片风格
+
+（排版与文字由封面工坊在浏览器内完成，此提示词仅用于生成底图。）`;
 }

@@ -1,0 +1,129 @@
+/* 封面工坊配方粘合层（cover-workshop 自有，非上游原文）。
+ * 仅包含 recipe 组合所需的少量补充：S05 行栅格 / M08 高行 /
+ * M16 影像封面文字规格（数值取自上游 references/layout-recipes.md 的规格表）。
+ * 主体排版与主题全部来自生成的 editorial.css / swiss.css（种子模板原文）。
+ * 选择器带体系前缀与生成 CSS 对齐（.cw-sys-editorial / .cw-sys-swiss）：
+ * 两侧特异性一致时按源顺序覆盖，extras 在种子 CSS 之后加载。
+ */
+
+/* ---------- 载入安全：issue-strip 为绝对定位，内容需预留底部空间（Editorial） ---------- */
+.cw-sys-editorial .poster .content.safe-bottom { padding-bottom: 150px; }
+.cw-sys-editorial .poster.wide .content.safe-bottom { padding-bottom: 130px; }
+
+/* ---------- S05 Trap / Warning Rows：左 mono 标签 右 后果（Swiss） ---------- */
+.cw-sys-swiss .s05-row {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 40px;
+  align-items: baseline;
+  padding: 40px 0;
+  border-bottom: 1px solid var(--grey-2);
+}
+.cw-sys-swiss .s05-row:last-of-type { border-bottom: 0; }
+.cw-sys-swiss .poster.square .s05-row { grid-template-columns: 220px 1fr; padding: 30px 0; gap: 28px; }
+.cw-sys-swiss .poster.wide .s05-row { grid-template-columns: 260px 1fr; padding: 26px 0; }
+
+/* ---------- M08 Tall Ledger：行高 118–170px（Editorial） ----------
+ * 种子的 96px 1fr auto 三列在长注记下会把 CJK 标题列挤成窄条（auto 列
+ * 按 max-content 优先取宽），这里固定为 96px / auto(标题) / 1fr(注记换行)。 */
+.cw-sys-editorial .ledger-row.tall { min-height: 150px; grid-template-columns: 96px auto 1fr; }
+.cw-sys-editorial .poster.square .ledger-row.tall { min-height: 126px; grid-template-columns: 72px auto 1fr; }
+.cw-sys-editorial .poster.wide .ledger-row.tall { min-height: 118px; }
+
+/* ---------- M16 Image-Led Cover（全幅影像 + 纸奶油色文字，Editorial） ----------
+ * 规格来自 layout-recipes.md M16 表：衬线 400–500、纸奶油 #f5f1e8（非纯白）、
+ * 标题 ≤120px、发丝线 rgba(245,241,232,.35)、mono 刊眉 tracking .20–.22em。
+ * 静态工具无法对任意上传照片跑安静区测试，按规格的兜底路径：
+ * 仅在文字区加 ≤0.30 的局部图像色调渐变（底部条带 / 单侧衰减），不做全图压暗。 */
+.cw-sys-editorial .m16-hero {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+.cw-sys-editorial .m16-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+  display: block;
+}
+/* 顶部 0–16% 追加一条局部暗带：内置插画偏浅奶油色时，奶油白刊眉/署名几乎不可辨；
+ * 只压顶部条带（非整图黑蒙层），对深色照片只是轻微加深，两类图都成立。 */
+.cw-sys-editorial .m16-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(10,10,11,.30) 0%, rgba(10,10,11,0) 16%),
+    linear-gradient(180deg, rgba(10,10,11,0) 58%, rgba(10,10,11,.26) 88%);
+}
+.cw-sys-editorial .m16-scrim.side {
+  background:
+    linear-gradient(180deg, rgba(10,10,11,.30) 0%, rgba(10,10,11,0) 16%),
+    radial-gradient(46% 62% at 20% 50%, rgba(10,10,11,.30), rgba(10,10,11,0) 72%);
+}
+.cw-sys-editorial .m16-text { position: relative; z-index: 2; color: #f5f1e8; }
+.cw-sys-editorial .m16-kicker {
+  font-family: var(--mono);
+  font-size: 22px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: #f5f1e8;
+  margin: 0 0 20px;
+  text-shadow: 0 1px 2px rgba(10,10,11,.5), 0 0 12px rgba(10,10,11,.28);
+}
+.cw-sys-editorial .m16-title {
+  font-family: var(--serif-zh);
+  font-weight: 500;
+  font-size: 96px;
+  line-height: 1.14;
+  letter-spacing: .12em;
+  margin: 0 0 24px;
+  color: #f5f1e8;
+}
+.cw-sys-editorial .m16-sub {
+  font-family: var(--serif-en);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 30px;
+  color: rgba(245,241,232,.86);
+  margin: 0 0 28px;
+}
+.cw-sys-editorial .m16-rule { width: 96px; height: 1px; background: rgba(245,241,232,.35); border: 0; margin: 0 0 26px; }
+.cw-sys-editorial .m16-strip {
+  font-family: var(--mono);
+  font-size: 20px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(245,241,232,.9);
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(10,10,11,.5), 0 0 12px rgba(10,10,11,.28);
+}
+.cw-sys-editorial .poster.square .m16-title { font-size: 84px; }
+.cw-sys-editorial .poster.wide .m16-title { font-size: 100px; }
+/* M16 模式 B（21:9）：左文柱。padding 与 .poster.wide .content 同规格，
+ * 否则左列文字贴画布 x=0 被左缘裁切（非 wide 分支自带 .content padding）。 */
+.cw-sys-editorial .m16-cols {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 40% 1fr;
+  height: 100%;
+  padding: 88px 120px;
+  box-sizing: border-box;
+}
+
+/* ---------- 导出外框（HTML 导出时居中预览，非海报本体） ---------- */
+.export-body {
+  background: #efeeec;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  box-sizing: border-box;
+}

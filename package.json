@@ -1,16 +1,29 @@
 {
   "name": "cover-workshop",
   "private": true,
-  "version": "0.2.0",
-  "description": "封面工坊 —— 浏览器本地的小红书封面编辑器（大字报 / 方法卡 / 图文志），导出 PNG 与 SVG",
+  "version": "0.3.0",
+  "description": "封面工坊 —— 浏览器本地的封面设计工具：Guizang 种子模板双体系（杂志图志 / 国际瑞士），导出 PNG / SVG / HTML / JSON",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "vendor:guizang": "node scripts/vendor-guizang.mjs",
+    "assets:poster": "node scripts/generate-poster-assets.mjs",
+    "icons:reicon": "node scripts/extract-reicon.mjs",
     "test": "node --test test/*.test.js"
   },
+  "dependencies": {
+    "@heroui/react": "^3.2.6",
+    "@heroui/styles": "^3.2.6",
+    "html-to-image": "^1.11.13",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.1.8",
+    "@vitejs/plugin-react": "^4.5.2",
+    "tailwindcss": "^4.1.8",
     "vite": "^6.3.5"
   }
 }
